@@ -1,0 +1,28 @@
+```{r libraries-data, message = F, warning = F}
+# libraries and data
+library(tidyverse)
+library(betareg)
+library(MASS)
+bbdata <- read_csv("bbdata.csv")
+```
+
+```{r}
+bb <- bbdata |>
+  mutate(
+    placement_bucket = case_when(
+      placement_rank_percent < .09 ~ "Winner",
+      placement_rank_percent <= .25 ~ "Late Game",
+      placement_rank_percent <= .5 ~ "Upper Middle",
+      placement_rank_percent <= .75 ~ "Lower Middle",
+      placement_rank_percent <= 1 ~ "Early Out"
+    ),
+    wins_bucket = case_when(
+      wins_rank_percent <= .25 ~ "Top Quartile",
+      wins_rank_percent <= .5 ~ "High Quartile",
+      wins_rank_percent <= .75 ~ "Low Quartile",
+      wins_rank_percent <= 1 ~ "Bottom Quartile"
+    ))
+```
+
+
+
