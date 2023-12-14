@@ -1,19 +1,27 @@
 ---
 title: "Is *Big Brother* Equitable? Diving into Disparities on the Hit Reality Show"
 author: "Ryan Mitchell"
-output:
-  pdf_document:
-    number_sections: true
 classoption: twocolumn
 date: "`r Sys.Date()`"
 geometry: margin = 1.3cm
 header-includes:
   - \usepackage{placeins}
+  - \usepackage[notext]{stix}
+  - \usepackage{step}
+  - \usepackage[T1]{fontenc}
+mainfont: Times New Roman
+output:
+  pdf_document:
+    number_sections: true
 urlcolor: blue
 editor_options: 
   markdown: 
     wrap: 72
 ---
+
+```{r include = FALSE}
+source("code.R", local = knitr::knit_global())
+```
 
 # Introduction
 
@@ -39,3 +47,12 @@ Variables of note for this project include the following (where a hashtag indica
   - `wins_bucket`\textsuperscript{\#}: Ordinal variable indicating how many competitions a houseguest won on their season, relative to the other houseguests. If multiple houseguests won the same number of competitions, those who were evicted earlier will receive a better rank as they had less opportunities to win competitions. The four levels are "Bottom Quartile", "Low Quartile", "High Quartile", and "Top Quartile"; these each encompass one quarter of the houseguests on each season.
   
 The response variables for this project will be `placement_bucket` and `wins_bucket`. The decision to define a houseguest's placement and competition performance as relative to the other contestants on their season is to account for the fact that different seasons have different amounts of houseguests and competitions; winning 2 competitions on a 10-week season is not identical to winning 2 competitions on a 14-week season.
+
+## Exploratory Data Analysis
+
+To visualize potential disparities in performance on *Big Brother* across demographic groups, I conducted exploratory data analysis on the 357 houseguests.
+
+```{r echo = F, fig.height = 7, fig.cap = "Breakdown of placement by demographic group"}
+fig1
+```
+
