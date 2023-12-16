@@ -34,6 +34,8 @@ bb <- bbdata |>
       age <= 80 ~ "40+"
     ))
 
+bb$season_code <- as.numeric(substr(bb$season_code, 5, length(bb$season_code)))
+
 bb$placement_bucket <- ordered(bb$placement_bucket,
                                levels = c("Early Out",
                                           "Lower Middle",
@@ -95,6 +97,7 @@ bb_age_wins <- bb |>
   mutate(per = label_percent(accuracy = 1)(freq)) |>
   ungroup()
 
+# stacked bar chart components
 bipoc_place <-
   ggplot(bb_bipoc_place, aes(y = BIPOC, x = freq, label = per, fill = placement_bucket)) +
   geom_col(position = "fill") +
@@ -179,3 +182,30 @@ fig1 <- (bipoc_place / lgbt_place / gender_place / age_place) +
 fig2 <- (gender_wins / age_wins) +
   plot_layout(guides = "collect", heights = c(1, 1.33)) &
   theme(legend.position = "top")
+
+# line chart -- bipoc place over time
+bipoc_place_time <- bb |>
+  filter(BIPOC == "Y") |>
+  select(first, season_code, placement_bucket) |>
+  arrange(season_code) |>
+  mutate(n = 1, cumul = cumsum(n),
+         lategame = if_else(placement_bucket %in% c("Late Game", "Winner"), "Y", "N")) |>
+  group_by(season_code) |>
+  mutate(cumul = max(cumul), cnt = sum(lategame == "Y")) |>
+  slice(1) |>
+  ungroup() |>
+  mutate(cumul_lategame = cumsum(cnt), cumul_perc = cumul_lategame / cumul)
+
+bipoc_place_time_annot <-
+  "CBS Introduces 50%
+BIPOC Initiative"
+
+fig3 <- ggplot(bipoc_place_time, aes(x = season_code, y = cumul_lategame)) +
+  geom_line(color = col5[5], linewidth = 2) +
+  annotate("text", x = 19, y = 20, label = bipoc_place_time_annot, family = "Times New Roman") + 
+  geom_vline(xintercept = 22.5, linetype = "dashed", linewidth = 1.5) +
+  labs(y = "Cum. Num of BIPOC HGs in Late-Game",
+       x = "Season Number") +
+  theme_bw() +
+  theme(text = element_text(family = "Times New Roman", size = 14),
+        panel.grid = element_blank())

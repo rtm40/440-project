@@ -56,3 +56,9 @@ To visualize potential disparities in performance on *Big Brother* across demogr
 fig1
 ```
 
+```{r echo = F, fig.width = 4, fig.height = 2.5, fig.cap = "Cumulative total of BIPOC houseguests making it to the late-game stage of *Big Brother* by season number. Late-game stage is defined as placing in the top 25% of contestants on your season, including the winner."}
+fig3
+```
+
+
+**Figure 1** displays the breakdown of *Big Brother* placement by BIPOC status, LGBT status, gender, and age group; in a scenario with perfect equity, all bars (except Late Game and Winner, which would need to be added together) would be at 25%. 

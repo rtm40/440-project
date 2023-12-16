@@ -177,3 +177,31 @@ age_wins <-
   theme(legend.position = "top")
 ```
 
+```{r}
+bipoc_place_time <- bb |>
+  filter(BIPOC == "Y") |>
+  select(first, season_code, placement_bucket) |>
+  arrange(season_code) |>
+  mutate(n = 1, cumul = cumsum(n),
+         lategame = if_else(placement_bucket %in% c("Late Game", "Winner"), "Y", "N")) |>
+  group_by(season_code) |>
+  mutate(cumul = max(cumul), cnt = sum(lategame == "Y")) |>
+  slice(1) |>
+  ungroup() |>
+  mutate(cumul_lategame = cumsum(cnt), cumul_perc = cumul_lategame / cumul)
+
+bipoc_place_time_annot <-
+"CBS Introduces 50%
+BIPOC Initiative"
+
+ggplot(bipoc_place_time, aes(x = season_code, y = cumul_lategame)) +
+  geom_line(color = col5[5], linewidth = 2) +
+  annotate("text", x = 19, y = 20, label = bipoc_place_time_annot, family = "Times New Roman") + 
+  geom_vline(xintercept = 22.5, linetype = "dashed", linewidth = 1.5) +
+  labs(y = "Cum. Num of BIPOC HGs in Late-Game",
+       x = "Season Number") +
+  theme_bw() +
+  theme(text = element_text(family = "Times New Roman", size = 14),
+        panel.grid = element_blank())
+```
+
