@@ -1,8 +1,7 @@
 ---
 title: "Is *Big Brother* Equitable? Diving into Disparities on the Hit Reality Show"
-author: "Ryan Mitchell"
+author: "Ryan Mitchell   •   December 18, 2023"
 classoption: twocolumn
-date: "`r Sys.Date()`"
 geometry: margin = 1.3cm
 header-includes:
   - \usepackage{placeins}
@@ -82,4 +81,14 @@ fig2
 fig3
 ```
 
-dbsdfhjbsdhjfshjdfbsdh
+**Figure 3** displays the breakdown of *Big Brother* competition performance by gender and age; these are the only factors examined due to their impact on one's physicality. There are two main competitions that occur each week of the show: the *Head of Household (HOH)* competition, where the winner gets to nominate two houseguests for possible eviction, and the *Power of Veto (POV)* competition, where the winner may save one of the two nominees (if they choose to do so, the HOH must then name a replacement nominee.) Other competition variants have been introduced over the years, but only HOH and POV wins will count towards a houseguest's performance.
+
+For *gender*, there is a blatant disparity in competition performance between men and women, signaling that past competitions might be inequitable. The proportion of men in the top quartile of performers on their season is almost triple the proportion for women (34% vs 13%); furthermore, women have been noticeably more often in the bottom half of performers (58% vs 44% for men.) 
+
+```{r echo = F, fig.height = 4, fig.cap = "Percent of competitions won by women during each season of *Big Brother*"}
+fig4
+```
+
+**Figure 4** offers another illustration of the gender imbalance when it comes to competition wins. Women have only won >50% of competitions in 6 out of 25 seasons; furthermore, more modern seasons of *Big Brother* are seeing historically low win percentages for women. After a new set design was unveilved for season 22, ushering in what some fans have referred to as the "New Era" of the show, women have won <35% of competitions in every season. Additionally, the most recent iteration, *Big Brother 25*, saw the lowest ever female win percentage at 19%. Viewers have criticized the show for its recent overreliance on physical competitions, which have historically favored men; older competitions more often involved a social, strategic, or mental aspect, making them more equitable for all contestants.
+
+Disparities in performance are less pronounced for *age*, although there are trends worth mentioning. While 19-29 year old houseguests are split approximately evenly across the board, houseguests over 40 have struggled to make it into the top quartile of competition performers, only doing so 18% of the time. Interestingly, houseguests in their thirties seem to have the upper hand, performing in the top half 56% of the time (compared to 44% for 40+ and 47% for 19-29.) 

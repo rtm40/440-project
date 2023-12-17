@@ -212,3 +212,28 @@ fig2 <- ggplot(bipoc_place_time, aes(x = season_code, y = cumul_lategame)) +
   theme_bw() +
   theme(text = element_text(family = "Times New Roman", size = 10),
         panel.grid = element_blank())
+
+
+# line/scatterplot -- comp wins by women over time
+gen_wins_time <- bb |>
+  select(first, season_code, gender, total_wins) |>
+  group_by(season_code) |>
+  mutate(numcomps = sum(total_wins)) |>
+  group_by(season_code, gender) |>
+  mutate(numwins_gen = sum(total_wins)) |>
+  filter(gender == "F") |>
+  slice(1) |>
+  ungroup() |>
+  mutate(perc_women_wins = numwins_gen / numcomps * 100)
+
+fig4 <- ggplot(gen_wins_time, aes(x = season_code, y = perc_women_wins)) +
+  geom_hline(yintercept = 50, linewidth = 1.2) +
+  annotate("text", x = 23, y = 52, label = "Equitable Scenario",
+           family = "Times New Roman", fontface = "bold") + 
+  geom_line(color = col5[4], linewidth = 0.7, linetype = "dashed") +
+  geom_point(color = col5[5], size = 3) +
+  labs(y = "% of Comps Won by Women",
+       x = "Season") +
+  theme_bw() +
+  theme(text = element_text(family = "Times New Roman", size = 14),
+        panel.grid = element_blank())
