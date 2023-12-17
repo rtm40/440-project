@@ -9,6 +9,7 @@ header-includes:
   - \usepackage[notext]{stix}
   - \usepackage{step}
   - \usepackage[T1]{fontenc}
+  - \setlength{\columnsep}{0.8cm}
 mainfont: Times New Roman
 output:
   pdf_document:
@@ -39,10 +40,11 @@ The bulk of the data for this project comes from a dataset created by Vince Dixo
 
 Variables of note for this project include the following (where a hashtag indicates the variable was not in the original Dixon dataset):
 
-  - `age`: The age of the houseguest at time of filming
-  - `gender`: The gender of the houseguest at time of filming. Note that *Big Brother* has never cast an individual who is openly neither male nor female, but contestants have come out as non-binary after the show.
+  - `age`: Numeric variable indicating age of the houseguest at time of filming
+  - `gender`: Binary indicator of the gender of the houseguest at time of filming. Note that *Big Brother* has never cast an individual who is openly neither male nor female, but contestants have come out as non-binary after the show.
   - `BIPOC`\textsuperscript{\#}: Binary indicator on whether or not the houseguest is Black, Indigenous, and/or a Person of Color. An "N" in this column refers to white, Anglo-American contestants.
   - `LGBT`\textsuperscript{\#}: Binary indicator on whether or not the houseguest identified as part of the LGBT community at time of filming.
+  - `season_code`: Numeric variable indicating the season that the houseguest participated in.
   - `placement_bucket`\textsuperscript{\#}: Ordinal variable indicating how well a houseguest placed on their season. The five levels are "Early Out", "Lower Middle", "Upper Middle", "Late Game", and "Winner"; these each encompass one quarter of the houseguests on each season, except for the fourth quarter which is split into "Late Game" and "Winner".
   - `wins_bucket`\textsuperscript{\#}: Ordinal variable indicating how many competitions a houseguest won on their season, relative to the other houseguests. If multiple houseguests won the same number of competitions, those who were evicted earlier will receive a better rank as they had less opportunities to win competitions. The four levels are "Bottom Quartile", "Low Quartile", "High Quartile", and "Top Quartile"; these each encompass one quarter of the houseguests on each season.
   
@@ -52,13 +54,32 @@ The response variables for this project will be `placement_bucket` and `wins_buc
 
 To visualize potential disparities in performance on *Big Brother* across demographic groups, I conducted exploratory data analysis on the 357 houseguests.
 
+### Placement
+
 ```{r echo = F, fig.height = 7, fig.cap = "Breakdown of placement by demographic group"}
 fig1
 ```
 
+**Figure 1** displays the breakdown of *Big Brother* placement by BIPOC status, LGBT status, gender, and age group; in a scenario with perfect equity, all bars (except Late Game and Winner, which would need to be added together) would be at 25%.
+
+For *LGBT status*, there does not seem to be a major disparity between queer and non-queer houseguests when it comes to making the upper middle portion of the game (51% for LGBT, 49% for non-LGBT); however, the proportion of non-LGBT houseguests who go on to win the game is almost double the proportion for LGBT houseguests (7% versus 4%.) There have only been two openly queer winners of *Big Brother*: Andy Herren in season 15, and Kaycee Clark in season 20. Fortunately, queer representation on the show appears to be on the rise, with the three most recent seasons topping the list for most LGBT houseguests (3 in season 24, and 4 in seasons 23 and 25.) 
+
+For *gender*, men have historically dominated the winners circle, taking the title in 17 out of 25 seasons of *Big Brother*; unfortunately, this trend does not seem to be on the decline, with only one woman winning in the five most recent seasons. The proportion of women making it to the late-game stage in general is also noticeably lower than it is for men (22% vs 27%); potential explanations for this could include the historical failure of womens' alliances, implicit/explicit biases on the basis of gender, or competition design that favors men (which will be touched upon later.)
+
+For *age*, houseguests in their thirties and beyond have historically had trouble clinching the win; the proportion of 19-29 year olds who earn the prize is triple that of the other age groups. This makes intuitive sense, as *Big Brother* casting has always skewed younger (median = 27, median = 29.1) and alliances tend to be formed on the basis of similarities. Despite this, though, houseguests above the age of 40 actually make the late game at a higher rate than the other age groups; on the flip side, their rate for being an early out is also the highest. There are two stereotypical outcomes for older houseguests on *Big Brother*: evicted first, likely due to not fitting in well with the group (like Jodi Rollins on season 14 or Steve Arienta on season 20), or taken to the end, likely due to not being seen as a threat (like Kevin Schlehuber on season 19 or Felicia Cannon on season 25.) Dick Donato from *Big Brother 8* is the only houseguest over 40 to win, doing so at the age of 44.
+
 ```{r echo = F, fig.width = 4, fig.height = 2.5, fig.cap = "Cumulative total of BIPOC houseguests making it to the late-game stage of *Big Brother* by season number. Late-game stage is defined as placing in the top 25% of contestants on your season, including the winner."}
+fig2
+```
+
+*BIPOC status* is unique in that it is the only demographic factor that the *Big Brother* casting team has explicitly addressed, namely via their aforementioned "50% BIPOC initiative" in 2020. As such, I wanted to examine how the performance of BIPOC houseguests on the show has shifted over time. **Figure 2** displays the cumulative total of BIPOC houseguests making it to the late-game (including winners) by season number, which reveals several trends in the on-show success of members of this community. Overall, as shown in **Figure 1**, BIPOC houseguests have made the upper middle stage of the game at a noticeably lower rate than their non-BIPOC counterparts (44% vs 51%); they also have struggled more making it to the late game, although their proportion of winners is on par with that of non-BIPOC (in much thanks to the consecutive wins of 3 BIPOC houseguests in every season since the diversity initiative.) Since the diversity initiative, which began after season 22, more BIPOC houseguests have managed to make it to the late-game; this comes after three noticeable stalls where none reached the end (seasons 7-10, 12-15, and 21-22.) From exploratory analysis alone, the initiative appears to be increasing equity for BIPOC contestants.
+
+\newpage
+
+### Competition Performance
+
+```{r echo = F, fig.height = 4, fig.cap = "Breakdown of competition performance by demographic group"}
 fig3
 ```
 
-
-**Figure 1** displays the breakdown of *Big Brother* placement by BIPOC status, LGBT status, gender, and age group; in a scenario with perfect equity, all bars (except Late Game and Winner, which would need to be added together) would be at 25%. 
+dbsdfhjbsdhjfshjdfbsdh

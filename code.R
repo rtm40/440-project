@@ -160,7 +160,8 @@ gender_wins <-
   theme_void() +
   theme(axis.title.y = element_text(face = "bold"),
         axis.text.y = element_text(),
-        text = element_text(family = "Times New Roman", size = 14))
+        text = element_text(family = "Times New Roman", size = 14),
+        legend.text = element_text(size = 9))
 
 age_wins <-
   ggplot(bb_age_wins, aes(y = age_bucket, x = freq, label = per, fill = wins_bucket)) +
@@ -172,14 +173,15 @@ age_wins <-
   theme_void() +
   theme(axis.title.y = element_text(face = "bold"),
         axis.text.y = element_text(),
-        text = element_text(family = "Times New Roman", size = 14))
+        text = element_text(family = "Times New Roman", size = 14),
+        legend.text = element_text(size = 9))
 
 # patchwork
 fig1 <- (bipoc_place / lgbt_place / gender_place / age_place) +
   plot_layout(guides = "collect", heights = c(1, 1, 1, 1.33)) &
   theme(legend.position = "top")
 
-fig2 <- (gender_wins / age_wins) +
+fig3 <- (gender_wins / age_wins) +
   plot_layout(guides = "collect", heights = c(1, 1.33)) &
   theme(legend.position = "top")
 
@@ -200,12 +202,13 @@ bipoc_place_time_annot <-
   "CBS Introduces 50%
 BIPOC Initiative"
 
-fig3 <- ggplot(bipoc_place_time, aes(x = season_code, y = cumul_lategame)) +
-  geom_line(color = col5[5], linewidth = 2) +
-  annotate("text", x = 19, y = 20, label = bipoc_place_time_annot, family = "Times New Roman") + 
+fig2 <- ggplot(bipoc_place_time, aes(x = season_code, y = cumul_lategame)) +
+  geom_line(color = col5[5], linewidth = 1.2) +
+  annotate("text", x = 16, y = 20, label = bipoc_place_time_annot,
+           family = "Times New Roman", fontface = "bold") + 
   geom_vline(xintercept = 22.5, linetype = "dashed", linewidth = 1.5) +
-  labs(y = "Cum. Num of BIPOC HGs in Late-Game",
-       x = "Season Number") +
+  labs(y = "Cum. # of BIPOC in Late-Game",
+       x = "Season") +
   theme_bw() +
-  theme(text = element_text(family = "Times New Roman", size = 14),
+  theme(text = element_text(family = "Times New Roman", size = 10),
         panel.grid = element_blank())
