@@ -108,7 +108,7 @@ A *proportional odds model* is the most widely used model for ordinal response v
   - Proportional odds, where each explanatory variable has the same effect at each cumulative split of the response
 
 ```{r echo = F}
-kbl(placement_brant, digits = 2, longtable = F, col.names = c("X2", "DF", "Prob"),
+kbl(placement_brant, digits = 2, longtable = F, col.names = c("X-squared", "DF", "Prob"),
     caption = "Results of Brant-Wald test for proportional odds model on placement") |>
   kable_styling(position = "center", latex_options = "HOLD_position")
 ```
@@ -123,7 +123,7 @@ where $i$ is the observation, $\alpha$ is the intercept, and $j$ is the level of
 Being that I have broken up competition performance into four ordered categories, I also chose to conduct ordinal logistic regression to model competition performance based on age and gender. While the first three assumptions of a proportional odds model are met, the Brant-Wald test (as seen in **Table 2**) indicated that gender was in violation of the proportional odds assumption.
 
 ```{r echo = F}
-kbl(comp_wipbrant, digits = 2, longtable = F, col.names = c("X2", "DF", "Prob"),
+kbl(comp_wipbrant, digits = 2, longtable = F, col.names = c("X-squared", "DF", "Prob"),
     caption = "Results of Brant-Wald test for proportional odds model on competitive performance") |>
   kable_styling(position = "center", latex_options = "HOLD_position")
 ```
