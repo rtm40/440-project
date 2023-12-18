@@ -155,11 +155,11 @@ kbl(as.data.frame(placement_table) |> dplyr::select(Value, `Std. Error`) |> slic
   kable_styling(position = "center", latex_options = "HOLD_position")
 ```
 
-**Table 3** and **Table 4** display the output from the placement model. I find that BIPOC status (at the $\alpha = 0.1$ level) and the interaction between BIPOC status and post-diversity-initiative status (at the $\alpha = 0.05$ level) are significantly associated with changes in placement bucket. The coefficient estimates for gender, LGBT status, and age are not significant, indicating that these demographic factors have not been historically associated with a significant increase or decrease to one's odds of making it to a better placement bucket.
+**Table 3** and **Table 4** display the output from the placement model. The model shows that BIPOC status (at the $\alpha = 0.1$ level) and the interaction between BIPOC status and post-diversity-initiative status (at the $\alpha = 0.05$ level) are significantly associated with placement bucket. The coefficient estimates for gender, LGBT status, and age are not significant, indicating that there is not enough evidence that these demographic factors are associated with placement bucket.
 
 Being that the model contains an interaction term, the interpretation of the main effect of BIPOC status is altered. Using **Table 3**, the model finds that a BIPOC contestant has approximately 34% lower odds (OR = 0.66) of achieving a better placement bucket in *Big Brother* versus a non-BIPOC contestant, holding all other variables constant *and* assuming the interaction variable is in its reference case value (meaning the contestant is playing before the diversity initiative.)
 
-A more sophisticated interpretation of the interaction effect can be achieved by examining the predicted probabilities for each placement bucket in each combination of BIPOC status and post-diversity-initiative status. [This](https://cran.r-project.org/web/packages/effects/effects.pdf) can be implemented with the `allEffects` function of the `effects` library in R.
+A more sophisticated interpretation of the interaction effect can be achieved by examining the predicted probabilities for each placement bucket in each combination of BIPOC status and post-diversity-initiative status. [This](https://cran.r-project.org/web/packages/effects/effects.pdf) can be implemented with the `allEffects` function from the `effects` library in R.
 
 ```{r echo = F}
 kbl(placement_probs_pivot, digits = 2, longtable = F,
@@ -171,4 +171,21 @@ kbl(placement_probs_pivot, digits = 2, longtable = F,
 
 ## Competition Performance
 
-As described, a partial proportional odds model was fit for competition performance, using the 
+As described, a partial proportional odds model was fit for competition performance, using the `vglm` function from the `VGAM` library in R.
+
+```{r echo = F}
+kbl(comp_stats |> slice(4:7), digits = 2, longtable = F,
+    col.names = c("Estimate", "Std.Error", "p", "Odds Ratio"),
+    caption = "Estimated coefficients from partial proportional odds model for competition performance. 1 = Bottom Quartile, 2 = Low Quartile, 3 = High Quartile.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(comp_stats |> dplyr::select(Estimate, `Std. Error`) |> slice(1:3), digits = 2, longtable = F,,
+    caption = "Estimated intercepts from partial proportional odds model for competition performance") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
+
+**Table 6** and **Table 7** display the output from the competition performance model. The model shows that gender is significantly associated with competition performance quartile at level 2 (at or below "Low Quartile"; $p < 0.01$) and level 3 (at or below "High Quartile"; $p < 0.001$.) The coefficient estimates for age is not significant, indicating there is not enough evidence that it is associated with competition performance quartile; interestingly, the coefficient estimate for gender is also not significant at level 1 ("Bottom Quartile"), meaning gender is not a significant predictor on whether or not a contestant is in the worst 25% of competition performers on their season. 
+
+The main effects for a partial proportional odds model must be interpreted differently than those from a full proportional odds model. Using **Table 6**, the model finds that a male contestant has approximately 45% lower odds (OR = 0.55) of being at or below the "Low Quartile" (bottom 50%) of competition performers on their season versus a female contestant; additionally, a male contestant has approximately 71% lower odds (OR = 0.29) of being at or below the "High Quartile" (bottom 75%) versus a female contestant. 
+
+The goodness-of-fit for both the placement model and the competition performance model was assessed with the Hosmerlem-Lemeshow, Lipsitz, and Pulksteins-Robinson tests, which are all recommended model diagnostics for [ordinal regression](https://journals.sagepub.com/doi/pdf/10.1177/1536867X1701700308#:~:text=3%20The%20goodness%2Dof%2Dfit,is%20wrong%20with%20the%20model.). These tests were implemented with the [`gofcat`](https://cran.r-project.org/web/packages/gofcat/gofcat.pdf) library in R; no test showed significant evidence of a lack of fit for either model (see **Appendix**.)
+

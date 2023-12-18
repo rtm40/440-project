@@ -13,6 +13,7 @@ library(showtext)
 library(kableExtra)
 library(generalhoslem)
 library(effects)
+library(gofcat)
 bbdata <- read_csv("data/bbdata.csv")
 font_add_google("STIX Two Text", "Times New Roman")
 showtext_auto()
@@ -285,8 +286,7 @@ placement_coeffs <- cbind(placement_coeffs, placement_pval)
 placement_table <- cbind(placement_coeffs, placement_or)
 placement_brant <- brant::brant(placement_model)
 placement_vif <- as.data.frame(vif(placement_model, type = "predictor"))
-placement_lipsitz <- lipsitz.test(placement_model)
-placement_pulkrob <- pulkrob.chisq(placement_model, catvars = c("BIPOC", "LGBT", "gender", "initiative"))
+placement_lipsitz <- lipsitz(placement_model)
 plot(allEffects(placement_model))
 
 # placement model effects
@@ -298,6 +298,8 @@ placement_effects$Initiative <- as.factor(placement_effects$Initiative)
 mod <- polr(placement_bucket ~ BIPOC + LGBT + Gender + Age +
               Initiative + Initiative * BIPOC,
             data = placement_effects)
+placement_pulkrob <- pulkroben(mod)
+placement_hosmerlem <- hosmerlem(mod)
 placement_probs <- allEffects(mod)[4]
 placement_probs_df <- as.data.frame(placement_probs[[1]])[, 1:7] |>
   dplyr::rename(`P(Early Out)` = prob.Early.Out,
@@ -317,4 +319,13 @@ comp_wipbrant <- brant::brant(comp_wipmodel)
 
 comp_model <- vglm(wins_bucket ~ Age + Gender, family = cumulative(parallel = FALSE ~ Gender, reverse = FALSE),
                    data = bb_for_tables)
-comp_stats <- summary(comp_model)@coef3
+comp_stats <- as.data.frame(summary(comp_model)@coef3) |>
+  mutate(`Odds Ratio` = exp(Estimate)) |>
+  dplyr::select(-(`z value`)) |>
+  dplyr::rename(p = `Pr(>|z|)`)
+rownames(comp_stats)[1:3] <- c("Bottom Quartile|Low Quartile", "Low Quartile|High Quartile", "High Quartile|Top Quartile")
+comp_lipsitz <- lipsitz(comp_model)
+comp_pulkrob_mod <- vglm(wins_bucket ~ Age + Gender, family = cumulative(parallel = FALSE ~ Gender, reverse = FALSE),
+                         data = placement_effects)
+comp_pulkrob <- pulkroben(comp_pulkrob_mod)
+comp_hosmerlem <- hosmerlem(comp_pulkrob_mod)
