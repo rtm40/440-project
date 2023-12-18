@@ -11,6 +11,8 @@ library(car)
 library(ggtext)
 library(showtext)
 library(kableExtra)
+library(generalhoslem)
+library(effects)
 bbdata <- read_csv("data/bbdata.csv")
 font_add_google("STIX Two Text", "Times New Roman")
 showtext_auto()
@@ -269,7 +271,7 @@ fig4 <- ggplot(gen_wins_time, aes(x = season_code, y = perc_women_wins)) +
 
 # placement model
 bb_for_tables <- bb |>
-  rename(Gender = gender, Age = age, Initiative = initiative) |>
+  dplyr::rename(Gender = gender, Age = age, Initiative = initiative) |>
   mutate(Gender = if_else(Gender == "M", 1, 0),
          BIPOC = if_else(BIPOC == "Y", 1, 0),
          LGBT = if_else(LGBT == "Y", 1, 0))
@@ -278,10 +280,41 @@ placement_model <- polr(placement_bucket ~ BIPOC + LGBT + Gender + Age +
                         data = bb_for_tables)
 placement_coeffs <- summary(placement_model)$coefficients
 placement_pval <- (1 - pnorm(abs(placement_coeffs[ ,"t value"]), 0, 1))*2
+placement_or <- exp(placement_coeffs[ ,"Value"])
 placement_coeffs <- cbind(placement_coeffs, placement_pval)
+placement_table <- cbind(placement_coeffs, placement_or)
 placement_brant <- brant::brant(placement_model)
 placement_vif <- as.data.frame(vif(placement_model, type = "predictor"))
+placement_lipsitz <- lipsitz.test(placement_model)
+placement_pulkrob <- pulkrob.chisq(placement_model, catvars = c("BIPOC", "LGBT", "gender", "initiative"))
+plot(allEffects(placement_model))
+
+# placement model effects
+placement_effects <- bb_for_tables
+placement_effects$BIPOC <- as.factor(placement_effects$BIPOC)
+placement_effects$LGBT <- as.factor(placement_effects$LGBT)
+placement_effects$Gender <- as.factor(placement_effects$Gender)
+placement_effects$Initiative <- as.factor(placement_effects$Initiative)
+mod <- polr(placement_bucket ~ BIPOC + LGBT + Gender + Age +
+              Initiative + Initiative * BIPOC,
+            data = placement_effects)
+placement_probs <- allEffects(mod)[4]
+placement_probs_df <- as.data.frame(placement_probs[[1]])[, 1:7] |>
+  dplyr::rename(`P(Early Out)` = prob.Early.Out,
+                `P(Lower Middle)` = prob.Lower.Middle,
+                `P(Upper Middle)` = prob.Upper.Middle,
+                `P(Late Game)` = prob.Late.Game,
+                `P(Winner)` = prob.Winner) |>
+  arrange(BIPOC)
+
+placement_probs_pivot <-
+  pivot_longer(placement_probs_df, cols = starts_with("P("), names_to = "Placement", values_to = "Value") |>
+  pivot_wider(names_from = c("BIPOC", "Initiative"), values_from = "Value")
 
 # competition model
 comp_wipmodel <- polr(wins_bucket ~ Gender + Age, data = bb_for_tables)
 comp_wipbrant <- brant::brant(comp_wipmodel)
+
+comp_model <- vglm(wins_bucket ~ Age + Gender, family = cumulative(parallel = FALSE ~ Gender, reverse = FALSE),
+                   data = bb_for_tables)
+comp_stats <- summary(comp_model)@coef3

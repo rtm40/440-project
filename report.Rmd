@@ -137,3 +137,38 @@ The methods proposed do have notable limitations worth mentioning. First, the de
 Second, while the analysis of competition performance only involves age and gender due to their impacts on one's physicality, there may be other factors with a potential impact. Further exploratory analysis (see **Appendix**) found that BIPOC contestants have historically performed worse in competitions, falling into the bottom quartile on their season 36% of the time (compared to 24% for non-BIPOC contestants.) Unlike age and gender, there is not an immediately reasonable explanation for this disparity; future analysis should examine this potential inequity and if it has been helped by the diversity initiative.
 
 Third, it is important to note the confounding variables that come with a houseguest being on one season versus another--for example, different seasons having more BIPOC and LGBT contestants, or different seasons having more strategically and physically competent players. A mixed-effect model was considered to mitigate this, but it would have created estimability issues being that there is not replicated data within each season (for example, there is only one winner per season.) Instead, I aim to address this problem by normalizing variables to reduce the effect of season-specific characteristics, although between-season variability is a prevalent issue in all analysis of reality TV competitions. 
+
+# Results
+
+## Placement
+
+As described, a proportional odds model was fit for placement, using the `polr` function from the `MASS` library in R.
+
+```{r echo = F}
+kbl(as.data.frame(placement_table) |> dplyr::select(-`t value`) |> head(6), digits = 2, longtable = F,
+    col.names = c("Estimate", "Std.Error", "p", "Odds Ratio"),
+    caption = "Estimated coefficients from proportional odds model for placement") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(as.data.frame(placement_table) |> dplyr::select(Value, `Std. Error`) |> slice(7:10), digits = 2, longtable = F,
+    col.names = c("Estimate", "Std.Error"),
+    caption = "Estimated intercepts from proportional odds model for placement") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
+
+**Table 3** and **Table 4** display the output from the placement model. I find that BIPOC status (at the $\alpha = 0.1$ level) and the interaction between BIPOC status and post-diversity-initiative status (at the $\alpha = 0.05$ level) are significantly associated with changes in placement bucket. The coefficient estimates for gender, LGBT status, and age are not significant, indicating that these demographic factors have not been historically associated with a significant increase or decrease to one's odds of making it to a better placement bucket.
+
+Being that the model contains an interaction term, the interpretation of the main effect of BIPOC status is altered. Using **Table 3**, the model finds that a BIPOC contestant has approximately 34% lower odds (OR = 0.66) of achieving a better placement bucket in *Big Brother* versus a non-BIPOC contestant, holding all other variables constant *and* assuming the interaction variable is in its reference case value (meaning the contestant is playing before the diversity initiative.)
+
+A more sophisticated interpretation of the interaction effect can be achieved by examining the predicted probabilities for each placement bucket in each combination of BIPOC status and post-diversity-initiative status. [This](https://cran.r-project.org/web/packages/effects/effects.pdf) can be implemented with the `allEffects` function of the `effects` library in R.
+
+```{r echo = F}
+kbl(placement_probs_pivot, digits = 2, longtable = F,
+    caption = "Predicted probabilities for each placement bucket by BIPOC status and post-diversity-initiative status. Column names are in the format $BIPOC\\_Initiative$. For BIPOC, 1 = Yes and 0 = No. For Initiative, 1 = After and 0 = Before.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
+
+**Table 5** shows that the predicted probability of winning for BIPOC contestants has doubled since the diversity initiative; additionally, the predicted probability of being an early out has been almost cut in half. 
+
+## Competition Performance
+
+As described, a partial proportional odds model was fit for competition performance, using the 
