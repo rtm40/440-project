@@ -14,6 +14,7 @@ library(kableExtra)
 library(generalhoslem)
 library(effects)
 library(gofcat)
+library(gtsummary)
 bbdata <- read_csv("data/bbdata.csv")
 font_add_google("STIX Two Text", "Times New Roman")
 showtext_auto()
@@ -287,6 +288,7 @@ placement_table <- cbind(placement_coeffs, placement_or)
 placement_brant <- brant::brant(placement_model)
 placement_vif <- as.data.frame(vif(placement_model, type = "predictor"))
 placement_lipsitz <- lipsitz(placement_model)
+placement_lipsitz_tbl <- cbind(placement_lipsitz$LRT, placement_lipsitz$df, placement_lipsitz$p.value)
 plot(allEffects(placement_model))
 
 # placement model effects
@@ -299,7 +301,10 @@ mod <- polr(placement_bucket ~ BIPOC + LGBT + Gender + Age +
               Initiative + Initiative * BIPOC,
             data = placement_effects)
 placement_pulkrob <- pulkroben(mod)
+placement_pulkrob_tbl <- cbind(placement_pulkrob$stat, placement_pulkrob$df, placement_pulkrob$p.value)
+rownames(placement_pulkrob_tbl) <- NULL
 placement_hosmerlem <- hosmerlem(mod)
+placement_hosmerlem_tbl <- cbind(placement_hosmerlem$chi.sq, placement_hosmerlem$df, placement_hosmerlem$p.value)
 placement_probs <- allEffects(mod)[4]
 placement_probs_df <- as.data.frame(placement_probs[[1]])[, 1:7] |>
   dplyr::rename(`P(Early Out)` = prob.Early.Out,
@@ -319,13 +324,17 @@ comp_wipbrant <- brant::brant(comp_wipmodel)
 
 comp_model <- vglm(wins_bucket ~ Age + Gender, family = cumulative(parallel = FALSE ~ Gender, reverse = FALSE),
                    data = bb_for_tables)
+comp_vif <- as.data.frame(vif(comp_wipmodel, type = "predictor"))
 comp_stats <- as.data.frame(summary(comp_model)@coef3) |>
   mutate(`Odds Ratio` = exp(Estimate)) |>
   dplyr::select(-(`z value`)) |>
   dplyr::rename(p = `Pr(>|z|)`)
 rownames(comp_stats)[1:3] <- c("Bottom Quartile|Low Quartile", "Low Quartile|High Quartile", "High Quartile|Top Quartile")
 comp_lipsitz <- lipsitz(comp_model)
+comp_lipsitz_tbl <- cbind(comp_lipsitz$LRT, comp_lipsitz$df, comp_lipsitz$p.value)
 comp_pulkrob_mod <- vglm(wins_bucket ~ Age + Gender, family = cumulative(parallel = FALSE ~ Gender, reverse = FALSE),
                          data = placement_effects)
 comp_pulkrob <- pulkroben(comp_pulkrob_mod)
 comp_hosmerlem <- hosmerlem(comp_pulkrob_mod)
+comp_pulkrob_tbl <- cbind(comp_pulkrob$stat, comp_pulkrob$df, comp_pulkrob$p.value)
+comp_hosmerlem_tbl <- cbind(comp_hosmerlem$chi.sq, comp_hosmerlem$df, comp_hosmerlem$p.value)

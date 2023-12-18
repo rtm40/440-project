@@ -196,8 +196,59 @@ The proposed approach for analyzing competition performance also has noteworthy 
 
 Overall, this analysis suggests that inequity has been a problem over *Big Brother*'s lifetime, particularly for BIPOC (in terms of placement) and women (in terms of competitions). Show producers could address these issues by maintaining consistent diversity in casting (as the BIPOC initiative has already shown promising effects) and leveling the playing field by including more mental and/or social-strategic challenges.
 
-# References
+# References {-}
 
 <div id="refs"></div>
 
-# Appendix
+\newpage 
+
+# Appendix {-}
+
+## Exploratory Data Analysis
+
+```{r echo = F, fig.height = 3, fig.cap = "Breakdown of competition performance by BIPOC status"}
+bipoc_wins
+```
+
+## Model Assumptions
+
+```{r echo = F}
+kbl(placement_vif, digits = 2, longtable = F,
+    col.names = c("VIF"),
+    caption = "Variance inflation factors for placement model. A VIF > 5 indicates multicollinearity may be present.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(comp_vif, digits = 2, longtable = F,
+    col.names = c("VIF"),
+    caption = "Variance inflation factors for competition performance model. A VIF > 5 indicates multicollinearity may be present.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
+
+## Model Diagnostics
+
+```{r echo = F}
+kbl(placement_lipsitz_tbl, digits = 2, longtable = F,
+    col.names = c("LRT", "df", "p"),
+    caption = "Results of Lipsitz test for placement model. $H_0$ is that no lack of fit is detected.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(placement_pulkrob_tbl, digits = 2, longtable = F,
+    col.names = c("X-squared", "df", "p"),
+    caption = "Results of Pulksteins-Robinson test for placement model. $H_0$ is that no lack of fit is detected.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(placement_hosmerlem_tbl, digits = 2, longtable = F,
+    col.names = c("X-squared", "df", "p"),
+    caption = "Results of Hosmerlem-Lemeshow test for placement model. $H_0$ is that no lack of fit is detected.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+
+kbl(comp_lipsitz_tbl, digits = 2, longtable = F,
+    col.names = c("LRT", "df", "p"),
+    caption = "Results of Lipsitz test for competition performance model. $H_0$ is that no lack of fit is detected.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(comp_pulkrob_tbl, digits = 2, longtable = F,
+    col.names = c("X-squared", "df", "p"),
+    caption = "Results of Pulksteins-Robinson test for competition performance model. $H_0$ is that no lack of fit is detected.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+kbl(comp_hosmerlem_tbl, digits = 2, longtable = F,
+    col.names = c("X-squared", "df", "p"),
+    caption = "Results of Hosmerlem-Lemeshow test for competition performance model. $H_0$ is that no lack of fit is detected.") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
