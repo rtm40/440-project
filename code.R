@@ -3,8 +3,14 @@ library(tidyverse)
 library(scales)
 library(ggridges)
 library(patchwork)
-library(showtext)
+library(MASS)
+library(brglm2)
+library(brant)
+library(VGAM)
+library(car)
 library(ggtext)
+library(showtext)
+library(kableExtra)
 bbdata <- read_csv("data/bbdata.csv")
 font_add_google("STIX Two Text", "Times New Roman")
 showtext_auto()
@@ -35,6 +41,8 @@ bb <- bbdata |>
     ))
 
 bb$season_code <- as.numeric(substr(bb$season_code, 5, length(bb$season_code)))
+
+bb <- bb |> mutate(initiative = if_else(season_code > 22, 1, 0))
 
 bb$placement_bucket <- ordered(bb$placement_bucket,
                                levels = c("Early Out",
@@ -92,6 +100,13 @@ bb_gender_wins <- bb |>
 
 bb_age_wins <- bb |>
   group_by(age_bucket, wins_bucket) |>
+  summarize(n = n()) |>
+  mutate(freq = n / sum(n)) |>
+  mutate(per = label_percent(accuracy = 1)(freq)) |>
+  ungroup()
+
+bb_bipoc_wins <- bb |>
+  group_by(BIPOC, wins_bucket) |>
   summarize(n = n()) |>
   mutate(freq = n / sum(n)) |>
   mutate(per = label_percent(accuracy = 1)(freq)) |>
@@ -176,6 +191,19 @@ age_wins <-
         text = element_text(family = "Times New Roman", size = 14),
         legend.text = element_text(size = 9))
 
+bipoc_wins <-
+  ggplot(bb_bipoc_wins, aes(y = BIPOC, x = freq, label = per, fill = wins_bucket)) +
+  geom_col(position = "fill") +
+  geom_text(size = 3, fontface = "bold", family = "Times New Roman",
+            position = position_stack(vjust = 0.5)) +
+  scale_fill_manual(values = col4) +
+  labs(y = "BIPOC", fill = "") +
+  theme_void() +
+  theme(axis.title.y = element_text(face = "bold"),
+        axis.text.y = element_text(),
+        text = element_text(family = "Times New Roman", size = 14),
+        legend.text = element_text(size = 9))
+
 # patchwork
 fig1 <- (bipoc_place / lgbt_place / gender_place / age_place) +
   plot_layout(guides = "collect", heights = c(1, 1, 1, 1.33)) &
@@ -188,7 +216,7 @@ fig3 <- (gender_wins / age_wins) +
 # line chart -- bipoc place over time
 bipoc_place_time <- bb |>
   filter(BIPOC == "Y") |>
-  select(first, season_code, placement_bucket) |>
+  dplyr::select(first, season_code, placement_bucket) |>
   arrange(season_code) |>
   mutate(n = 1, cumul = cumsum(n),
          lategame = if_else(placement_bucket %in% c("Late Game", "Winner"), "Y", "N")) |>
@@ -216,7 +244,7 @@ fig2 <- ggplot(bipoc_place_time, aes(x = season_code, y = cumul_lategame)) +
 
 # line/scatterplot -- comp wins by women over time
 gen_wins_time <- bb |>
-  select(first, season_code, gender, total_wins) |>
+  dplyr::select(first, season_code, gender, total_wins) |>
   group_by(season_code) |>
   mutate(numcomps = sum(total_wins)) |>
   group_by(season_code, gender) |>
@@ -237,3 +265,23 @@ fig4 <- ggplot(gen_wins_time, aes(x = season_code, y = perc_women_wins)) +
   theme_bw() +
   theme(text = element_text(family = "Times New Roman", size = 14),
         panel.grid = element_blank())
+
+
+# placement model
+bb_for_tables <- bb |>
+  rename(Gender = gender, Age = age, Initiative = initiative) |>
+  mutate(Gender = if_else(Gender == "M", 1, 0),
+         BIPOC = if_else(BIPOC == "Y", 1, 0),
+         LGBT = if_else(LGBT == "Y", 1, 0))
+placement_model <- polr(placement_bucket ~ BIPOC + LGBT + Gender + Age +
+                        Initiative + Initiative * BIPOC,
+                        data = bb_for_tables)
+placement_coeffs <- summary(placement_model)$coefficients
+placement_pval <- (1 - pnorm(abs(placement_coeffs[ ,"t value"]), 0, 1))*2
+placement_coeffs <- cbind(placement_coeffs, placement_pval)
+placement_brant <- brant::brant(placement_model)
+placement_vif <- as.data.frame(vif(placement_model, type = "predictor"))
+
+# competition model
+comp_wipmodel <- polr(wins_bucket ~ Gender + Age, data = bb_for_tables)
+comp_wipbrant <- brant::brant(comp_wipmodel)

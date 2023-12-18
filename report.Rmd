@@ -40,9 +40,9 @@ The bulk of the data for this project comes from a dataset created by Vince Dixo
 Variables of note for this project include the following (where a hashtag indicates the variable was not in the original Dixon dataset):
 
   - `age`: Numeric variable indicating age of the houseguest at time of filming
-  - `gender`: Binary indicator of the gender of the houseguest at time of filming. Note that *Big Brother* has never cast an individual who is openly neither male nor female, but contestants have come out as non-binary after the show.
-  - `BIPOC`\textsuperscript{\#}: Binary indicator on whether or not the houseguest is Black, Indigenous, and/or a Person of Color. An "N" in this column refers to white, Anglo-American contestants.
-  - `LGBT`\textsuperscript{\#}: Binary indicator on whether or not the houseguest identified as part of the LGBT community at time of filming.
+  - `gender`: Binary indicator of the gender of the houseguest at time of filming (1 = Male, 0 = Female.) Note that *Big Brother* has never cast an individual who is openly neither male nor female, but contestants have come out as non-binary after the show.
+  - `BIPOC`\textsuperscript{\#}: Binary indicator on whether or not the houseguest is Black, Indigenous, and/or a Person of Color (1 = Yes, 0 = No.)
+  - `LGBT`\textsuperscript{\#}: Binary indicator on whether or not the houseguest identified as part of the LGBT community at time of filming (1 = Yes, 0 = No.)
   - `season_code`: Numeric variable indicating the season that the houseguest participated in.
   - `placement_bucket`\textsuperscript{\#}: Ordinal variable indicating how well a houseguest placed on their season. The five levels are "Early Out", "Lower Middle", "Upper Middle", "Late Game", and "Winner"; these each encompass one quarter of the houseguests on each season, except for the fourth quarter which is split into "Late Game" and "Winner".
   - `wins_bucket`\textsuperscript{\#}: Ordinal variable indicating how many competitions a houseguest won on their season, relative to the other houseguests. If multiple houseguests won the same number of competitions, those who were evicted earlier will receive a better rank as they had less opportunities to win competitions. The four levels are "Bottom Quartile", "Low Quartile", "High Quartile", and "Top Quartile"; these each encompass one quarter of the houseguests on each season.
@@ -92,3 +92,48 @@ fig4
 **Figure 4** offers another illustration of the gender imbalance when it comes to competition wins. Women have only won >50% of competitions in 6 out of 25 seasons; furthermore, more modern seasons of *Big Brother* are seeing historically low win percentages for women. After a new set design was unveilved for season 22, ushering in what some fans have referred to as the "New Era" of the show, women have won <35% of competitions in every season. Additionally, the most recent iteration, *Big Brother 25*, saw the lowest ever female win percentage at 19%. Viewers have criticized the show for its recent overreliance on physical competitions, which have historically favored men; older competitions more often involved a social, strategic, or mental aspect, making them more equitable for all contestants.
 
 Disparities in performance are less pronounced for *age*, although there are trends worth mentioning. While 19-29 year old houseguests are split approximately evenly across the board, houseguests over 40 have struggled to make it into the top quartile of competition performers, only doing so 18% of the time. Interestingly, houseguests in their thirties seem to have the upper hand, performing in the top half 56% of the time (compared to 44% for 40+ and 47% for 19-29.) 
+
+## Model
+
+### Placement
+
+Being that I have broken up placement into five ordered categories, I chose to conduct ordinal logistic regression to model placement based on BIPOC status, LGBT status, gender, and age. Since *Big Brother* has fundamentally changed the way they cast seasons based on BIPOC status, I also wanted to include potential effects of the 2020 diversity initiative. To do so, I created a binary indicator for each houseguest which designates whether they competed on the show before or after the initiative (1 = After, 0 = Before.) This indicator variable's interaction with BIPOC status will be included as a predictor in the model.
+
+A *proportional odds model* is the most [widely used model](https://www.stat.uchicago.edu/~pmcc/pubs/paper2.pdf) for ordinal response variables; it fits a binomial logistic regression model at each consecutive level of the response variable, so we can see what factors are associated with higher response values. The proportional odds model makes [four assumptions](https://www.st-andrews.ac.uk/media/ceed/students/mathssupport/ordinal%20logistic%20regression.pdf):
+
+  - The response variable is ordinal
+  - One or more of the explanatory variables are either continuous, categorical, or ordinal
+  - There is no multicollinearity between the explanatory variables
+  - Proportional odds, where each explanatory variable has the same effect at each cumulative split of the response
+
+```{r echo = F}
+kbl(placement_brant, digits = 2, longtable = F, col.names = c("X2", "DF", "Prob"),
+    caption = "Results of Brant-Wald test for proportional odds model on placement") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
+
+The first two assumptions are met by how the data has been constructed and wrangled. The third assumption was met by verifying that the variance inflation factors (VIFs) for all explanatory variables were under a threshold (see **Appendix**.) The fourth assumption can be verified with a [Brant-Wald test](https://peopleanalytics-regression-book.org/ord-reg.html), where probability values below .05 indicate that the coefficient is in violation of proportional odds.
+
+**Table 1** displays the results of the Brant-Wald test, which show no violations of proportional odds; therefore, I proceed with this model. The placement model will take on the form: $$\begin{split}\text{logit}(\text{P}(Y_i \leq j)) = \alpha_j + \beta_1 * \text{BIPOC}_i + \beta_2 * \text{LGBT}_i + \beta_3 * \text{Gender}_i \\ + \beta_4 * \text{Age}_i + \beta_5 * \text{Initiative} + \beta_6 * (\text{Initiative} * \text{BIPOC}) \end{split}$$
+where $i$ is the observation, $\alpha$ is the intercept, and $j$ is the level of the response variable.
+
+### Competition Performance
+
+Being that I have broken up competition performance into four ordered categories, I also chose to conduct ordinal logistic regression to model competition performance based on age and gender. While the first three assumptions of a proportional odds model are met, the Brant-Wald test (as seen in **Table 2**) indicated that gender was in violation of the proportional odds assumption.
+
+```{r echo = F}
+kbl(comp_wipbrant, digits = 2, longtable = F, col.names = c("X2", "DF", "Prob"),
+    caption = "Results of Brant-Wald test for proportional odds model on competitive performance") |>
+  kable_styling(position = "center", latex_options = "HOLD_position")
+```
+
+To address this violation, competition performance will be studied with a [*partial proportional odds model*](https://www.jstor.org/stable/2347760), which stipulates that the effect of gender is not the same across all levels of competition performance (although the opposite is true for age.) The competition performance model will take on the form: $$\text{logit}(\text{P}(Y_i \leq j)) = \alpha_j + \beta_1 * \text{Age}_i + \beta_{j2} * \text{Gender}_i$$
+where $i$ is the observation, $\alpha$ is the intercept, and $j$ is the level of the response variable.
+
+## Limitations
+
+The methods proposed do have notable limitations worth mentioning. First, the decision to combine BIPOC houseguests into one category may overgeneralize the experiences of racial/ethnic minorities on *Big Brother*; particularly, the experiences of Black contestants on the show have been historically more difficult, a nuance that cannot be entirely captured by this analysis. The BIPOC binary indicator is not meant to treat non-White contestants as a monolith, but rather it is used to examine the effects of CBS's diversity initiative (which uses this term.)
+
+Second, while the analysis of competition performance only involves age and gender due to their impacts on one's physicality, there may be other factors with a potential impact. Further exploratory analysis (see **Appendix**) found that BIPOC contestants have historically performed worse in competitions, falling into the bottom quartile on their season 36% of the time (compared to 24% for non-BIPOC contestants.) Unlike age and gender, there is not an immediately reasonable explanation for this disparity; future analysis should examine this potential inequity and if it has been helped by the diversity initiative.
+
+Third, it is important to note the confounding variables that come with a houseguest being on one season versus another--for example, different seasons having more BIPOC and LGBT contestants, or different seasons having more strategically and physically competent players. A mixed-effect model was considered to mitigate this, but it would have created estimability issues being that there is not replicated data within each season (for example, there is only one winner per season.) Instead, I aim to address this problem by normalizing variables to reduce the effect of season-specific characteristics, although between-season variability is a prevalent issue in all analysis of reality TV competitions. 
