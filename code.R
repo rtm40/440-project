@@ -281,10 +281,15 @@ placement_model <- polr(placement_bucket ~ BIPOC + LGBT + Gender + Age +
                         Initiative + Initiative * BIPOC,
                         data = bb_for_tables)
 placement_coeffs <- summary(placement_model)$coefficients
+placement_ints <- as.data.frame(placement_coeffs) |> slice(7:10)
+rownames(placement_ints) <- c("> Early Out", "> Lower Middle", "> Upper Middle", "> Late Game")
 placement_pval <- (1 - pnorm(abs(placement_coeffs[ ,"t value"]), 0, 1))*2
 placement_or <- exp(placement_coeffs[ ,"Value"])
-placement_coeffs <- cbind(placement_coeffs, placement_pval)
-placement_table <- cbind(placement_coeffs, placement_or)
+placement_ci <- exp(cbind(OR = coef(placement_model), confint(placement_model, level = 0.9)))
+placement_table <- as.data.frame(placement_coeffs |> head(6) |> cbind(placement_ci)) |>
+  mutate(`OR (90% CI)` = paste0(round(OR, 2), " (", round(`5 %`, 2), ", ", round(`95 %`, 2), ")")) |>
+  select(Value, `Std. Error`, `OR (90% CI)`)
+
 placement_brant <- brant::brant(placement_model)
 placement_vif <- as.data.frame(vif(placement_model, type = "predictor"))
 placement_lipsitz <- lipsitz(placement_model)
@@ -338,3 +343,11 @@ comp_pulkrob <- pulkroben(comp_pulkrob_mod)
 comp_hosmerlem <- hosmerlem(comp_pulkrob_mod)
 comp_pulkrob_tbl <- cbind(comp_pulkrob$stat, comp_pulkrob$df, comp_pulkrob$p.value)
 comp_hosmerlem_tbl <- cbind(comp_hosmerlem$chi.sq, comp_hosmerlem$df, comp_hosmerlem$p.value)
+
+comp_ints <- as.data.frame(comp_stats) |> slice(1:3) |> select(Estimate, `Std. Error`)
+rownames(comp_ints) <- c("< Low Quartile", "< High Quartile", "< Top Quartile")
+comp_ci <- as.data.frame(exp(confint(comp_model, level = 0.9))) |> slice(4:7)
+comp_table <- as.data.frame(comp_stats |> slice(4:7) |> cbind(comp_ci)) |>
+  mutate(`OR (90% CI)` = paste0(round(`Odds Ratio`, 2), " (", round(`5 %`, 2), ", ", round(`95 %`, 2), ")")) |>
+  select(Estimate, `Std. Error`, `OR (90% CI)`)
+rownames(comp_table) <- c("Age", "Gender, < Low", "Gender, < High", "Gender, < Top")
