@@ -1,6 +1,7 @@
 ---
 title: "An Investigation of Inequity on *Big Brother*: Diving into Disparities on the Hit Reality Show"
-author: "December 18, 2023"
+author: "Ryan Mitchell"
+date: "December 18, 2023"
 geometry: margin = 1in
 header-includes:
   - \usepackage{placeins}
